@@ -1,57 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>SpWIFT- Specify Web-based Import Facilitation Tool</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  </head>
-<body>
-    <div class="container-fluid p-4 bg-primary text-white text-center">
-        <h1>SpWIFT</h1>
-        <h3>Specify Web-based Import Facilitation Tool</h3>
-        <p>(under construction...)</p>
-    </div>
-    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-        <div class="container-fluid">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Data</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">More...</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-<div class="container px-4">
-    {% if session_userid %}
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-sm-8 bg-light border mx-4">
-                <h2>Tools</h2>
-                <br/>
+{% extends "spwift/base.html" %}
+
+{% block title %}SpWIFT - Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block pagename %}Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block contenttitle %}Tools{% endblock %}
+
+{% block content %}
                 <div class="row">
                     <div class="coll">
                         <div class="container-sm border bg-white">
                             <br>
                             <h4>Mass Annotated Digitization Desk</h4>
                             <form action="{% url 'spwift:digit' %}" method="post">{% csrf_token %}
+                                <label for="dataset">Choose dataset:</label>
+                                <select id="dataset" name="dataset" style="width:340px;">
+                                    <option value="0">[New Dataset]</option>
+                                    {% if datasets %}
+                                        {% for d in datasets %}
+                                    <option value="{{ d.pk }}" >{{ d.name }}</option> 
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>&nbsp;
+                                <input type="submit" value="Go digitize!"/>
+                                <br>
                                 <label for="collection">Collection</label>
                                 <select id="collection" name="collection">
                                     {% if collections %}
-                                        {% for key, value in collections.items %}
-                                    <option value="{{ value }}">{{ key }}</option>
+                                        {% for c in collections %}
+                                    <option value="{{ c.pk }}">{{ c.name }}</option>
                                         {% endfor %}
                                     {% else %}
-                                        <option value="0">-choose collection-</option>
                                     {% endif %}
                                 </select>
-                                <input type="submit" value="Start digitizing!"/>
                                 <p>&nbsp;</p>
                             </form>
                         </div>
@@ -67,37 +48,17 @@
                         &nbsp;
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-2 bg-light border mx-4">
-                <h2>Session</h2>
-                <p>Welcome, user '{{session_userid}}' !</p>
-                <form action="{% url 'spwift:logout' %}" method="post">{% csrf_token %}
-                    <input type="submit" value="Log out"/>
-                </form>
-                <br/><br/><br/>
-            </div>    
-            <br/><br/><br/>
-        </div>
-        <br/><br/><br/>
-    </div>
-    {% else %}
-    <div class="container p-5 my-5">
-        <div class="row">
-            <div class="col bg-light">
-                <p>Please log in:</p>
-                <form action="{% url 'spwift:login' %}" method="post">{% csrf_token %}
-                    {% if error_message %}<p style="color:red;"><strong>{{ error_message }}</strong></p>{% endif %}
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password">
-                    <input type="submit" value="Log in"/>
-                </form>
-            </div>    
-        </div>
-        <div class="row">
-        </div>    
-    </div>
-    {% endif %}
-</div>
+            {% endblock %}
+
+            {% block sessioninfo %}
+                <p>Welcome, {{username}}!</p>
+                <br/><br/>
+                
+                {% if datasets %}
+                {% for d in datasets %}
+            <p>{{ d.pk }} {{ d.name }}</p> 
+                {% endfor %}
+            {% endif %}
+            {% endblock %}
+
 </body>

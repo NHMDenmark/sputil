@@ -1,83 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>SpWIFT- Specify Web-based Import Facilitation Tool</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  </head>
-<body>
-    <div class="container-fluid p-4 bg-primary text-white text-center">
-        <h1>SpWIFT</h1>
-        <h3>Mass Annotated Digitization Desk (MADD)</h3>
-    </div>
-    <div class="container px-4">
-        <div class="container mt-3">
-            <div class="row">
-                <div class="col-sm-7 bg-light border mx-4">
-                    <h2>Data Entry Form</h2>
-                    <br/>
+{% extends "spwift/base.html" %}
+
+{% block title %}SpWIFT - Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block pagename %}Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block contenttitle %}Mass Annotated Digitization Desk (MADD){% endblock %}
+
+{% block content %} 
                     <div class="row">
                         <div class="coll">
                             <label for="barcode">Barcode</label>
-                            <input type="text" id="barcode" name="barcode" size="12">
-                            <label for="catnr">Catalog Nr</label>
-                            <input type="text" id="catnr" name="catnr" size="12">
+                            <input type="text" id="barcode" name="barcode" size="14">
+                            <label for="catnr">Alt Cat Nr</label>
+                            <input type="text" id="catnr" name="catnr" size="14">
                             <input type="checkbox" id="barcode_catnr" name="barcode_catnr">
                             <label for="barcode_catnr">Barcode=CatNr</label>
                         </div>
                     </div>
-                    <br>
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="coll">
                             <label for="region">Broad Geographical Region</label><br>
-                            <input type="text" id="region" name="region" size="48">
+                            <input type="text" id="region" name="region" size="49">
                         </div>
                     </div>
-                    <br>
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="coll">
                             <label for="taxon">Determination</label><br>
-                            <input type="text" id="taxon" name="taxon" size="48">
+                            <input type="text" id="taxon" name="taxon" size="49">
                             <input type="checkbox" id="type" name="type">
                             <label for="type">Type</label>
                         </div>
                     </div>
-                    <br>
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="coll">
                             <label for="storage">Storage</label><br>
-                            <input type="text" id="storage" name="storage" size="48">
+                            <input type="text" id="storage" name="storage" size="49">
                         </div>
                     </div>
-                    <br>
-                    <div class="row">
+                    <div class="row mt-3 mb-3">
                         <div class="coll">
-                            <input type="submit" value="Save & Go Back">
-                            <input type="submit" value="Save">
-                            <input type="submit" value="Save & Next">
+                            <div class="container-fluid">
+                                <input type="submit" value="Save & Go Back">
+                                <input type="submit" value="Save">
+                                <input type="submit" value="Save & Next">
+                            </div>
                         </div>
                     </div>
+{% endblock %}
+
+{% block sessioninfo %}
+                <p>
+                    <b>Username:</b> {{username}}<br>
+                    <b>DateTime:</b> {% now "jS F Y H:i" %}<br>
+                    <b>Collection:</b> {{collection.name}}<br>
+                    <b>DataSet:</b> {{dataset_name}}
+                </p>
+                <!--<p>Collection:
+                    <br>                 
+                    <select id="collection" name="collection">
+                    {% if collections %}
+                        <option value="0">(selected collection)</option>                        
+                        {% for c in collections %}
+                        <option value="{{ c.spid }}" {% if c.spid|stringformat:"i" == collectionid.0 %} selected="selected" {%endif%}   >{{c.name|slice:"0:38"}}</option>
+                        {% endfor %}
+                    {% endif %}
+                        <option value="99">Select me!</option>
+                    </select>
+                </p>-->
+                <p>Preptype: 
                     <br>
-                </div>
-                <div class="col-sm-3 bg-light border mx-4">
-                    <h3>Current Session</h3>
-                    <p>Username: {{ session_userid }}</p>
-                    <p>DateTime: {{ DateTime.Now }}</p>
-                    <p>Collection: <select id="collection" name="collection">
-                        <option>(current collection)</option>
-                    </select></p>
-                    <p>Preptype: 
-                        <br>
-                        <select id="preptype" name="preptype">
+                    <select id="preptype" name="preptype">
                         <option>(current preptype)</option>
-                        </select>
-                    </p>
-                </div>    
-                <br/><br/><br/>
-            </div>
-            <br/><br/><br/>
-        </div>
-    </div>
-</body>
+                    </select>
+                </p>
+                <p>Higher Taxon: 
+                    <br>
+                    <select id="taxon" name="taxon">
+                    <option>(current taxon)</option>
+                    </select>
+                </p>
+                <h4>Debugging:</h4>
+                   <!-- 
+                    <p>{{collections.0}}
+                    <p>currcoll: {{collectionid}}</p>
+                    <p>datasetid: {{datasetid}}</p>
+                    -->
+{% endblock %}

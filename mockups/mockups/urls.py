@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from .views import index, redirect_view
 
 urlpatterns = [
+    #path('', redirect_view),
+    path('', index),
     path('spwift/', include('spwift.urls')),
     path('admin/', admin.site.urls),
 ]
