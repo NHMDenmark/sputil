@@ -1,0 +1,23 @@
+{% extends "spwift/base.html" %}
+
+{% block title %}SpWIFT - Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block pagename %}Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block contenttitle %}Mass Annotated Digitization Desk (MADD){% endblock %}
+
+{% block content %} 
+<h2>DataSets</h2>
+<ul>
+{%for dataset in object_list%}
+<li>{{dataset.pk}}</li>
+{%endfor%}
+</ul>
+
+{%endblock%}
+
+{% block sessioninfo %}
+
+
+
+{%endblock%}

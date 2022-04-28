@@ -13,6 +13,7 @@
                             <br>
                             <h4>Mass Annotated Digitization Desk</h4>
                             <form action="{% url 'spwift:digit' %}" method="post">{% csrf_token %}
+                                <input type="hidden" id="post_origin" name="post_origin" value="index"/>
                                 <label for="dataset">Choose dataset:</label>
                                 <select id="dataset" name="dataset" style="width:340px;">
                                     <option value="0">[New Dataset]</option>
@@ -52,13 +53,26 @@
 
             {% block sessioninfo %}
                 <p>Welcome, {{username}}!</p>
-                <br/><br/>
-                
+                <br/>
+                {%if error %}
+                    <p>{{ error }}</p>
+                {%endif%}
+                <br/>            
+                {% if sessions %}
+                    {% for s in sessions %}
+                        <p>{{s.name}}</p>
+                    {% endfor%}
+                {% endif %}
+            
                 {% if datasets %}
-                {% for d in datasets %}
-            <p>{{ d.pk }} {{ d.name }}</p> 
-                {% endfor %}
-            {% endif %}
+                <p><b>Your datasets:</b></p>
+                    <ul>
+                    {% for d in datasets %}
+                        <li><a href="">{{ d.pk }}:{{ d.name }}</a></li> 
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            
             {% endblock %}
 
 </body>

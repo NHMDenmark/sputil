@@ -7,6 +7,8 @@
 {% block contenttitle %}Mass Annotated Digitization Desk (MADD){% endblock %}
 
 {% block content %} 
+                <form action="{% url 'spwift:digit' %}" method="post">{% csrf_token %}
+                    <input type="hidden" id="post_origin" name="post_origin" value="digit"/>
                     <div class="row">
                         <div class="coll">
                             <label for="barcode">Barcode</label>
@@ -20,13 +22,13 @@
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="region">Broad Geographical Region</label><br>
-                            <input type="text" id="region" name="region" size="49">
+                            <input type="text" id="region" name="region" size="49" value="{%if region%}{{region}}{%endif%}">
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="taxon">Determination</label><br>
-                            <input type="text" id="taxon" name="taxon" size="49">
+                            <input type="text" id="taxon" name="taxon" size="49" value="{%if taxon%}{{taxon}}{%endif%}">
                             <input type="checkbox" id="type" name="type">
                             <label for="type">Type</label>
                         </div>
@@ -34,7 +36,7 @@
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="storage">Storage</label><br>
-                            <input type="text" id="storage" name="storage" size="49">
+                            <input type="text" id="storage" name="storage" size="49" value="{%if storage%}{{storage}}{%endif%}">
                         </div>
                     </div>
                     <div class="row mt-3 mb-3">
@@ -46,6 +48,7 @@
                             </div>
                         </div>
                     </div>
+                </form>
 {% endblock %}
 
 {% block sessioninfo %}
@@ -71,6 +74,11 @@
                     <br>
                     <select id="preptype" name="preptype">
                         <option>(current preptype)</option>
+                    {% if preptypes %}
+                        {% for pt in preptypes %}
+                        <option value="{{pt.spid}}" {%if pt.spid|stringformat:"i" == preptypeid.0 %} select {%endif%}>{{pt.name}}</option>
+                        {% endfor %}
+                    {% endif %}
                     </select>
                 </p>
                 <p>Higher Taxon: 
@@ -79,8 +87,8 @@
                     <option>(current taxon)</option>
                     </select>
                 </p>
-                <h4>Debugging:</h4>
-                   <!-- 
+                <!-- 
+                    <h4>Debugging:</h4>                   
                     <p>{{collections.0}}
                     <p>currcoll: {{collectionid}}</p>
                     <p>datasetid: {{datasetid}}</p>
