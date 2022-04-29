@@ -4,7 +4,7 @@ from queue import Empty
 from time import strftime
 from xmlrpc.client import DateTime 
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponseRedirect #, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect #, JsonResponse
 from django.urls import reverse 
 # import requests, ssl, sys
 
@@ -183,11 +183,35 @@ def login(request):
     request.session['userid'] = spuser.pk
     return HttpResponseRedirect(reverse('spwift:index', args=()))
 
-def dataset(request):
-    context = {
+def dataset(request, dataset_id):
+    userid = request.session.get('userid', -1)
+    errormsg = ''
+    context = {}
+    try:
+        dataset = DataSet.objects.get(pk=dataset_id)
+        print(dataset.datasetrow_set.count())
+        context = {
+            'userid' : userid,
+            'datasetid' : dataset_id,
+            'dataset' : dataset,
+            'datasetrows' : dataset.datasetrow_set.all(),
+            'error' : errormsg,
+            'hidesession' : True,
+            'contentwidth' : 12,
+        }
+    except DataSet.DoesNotExist:
+        errormsg = 'No dataset with id %s exists' % dataset_id 
+        context = {
+            'userid' : userid,
+            'datasetid' : dataset_id,
+            'error' : errormsg,
+            'hidesession' : True,
+        }
 
-    }
     return render(request, 'spwift/dataset.html', context)
+
+#class DataSetListView(ListView):
+#    model = DataSet
 
 def logout(request):
     print('logout')
@@ -196,6 +220,3 @@ def logout(request):
     except:
         print('error on logout')
     return HttpResponseRedirect(reverse('spwift:index', args=()))
-
-class DataSetListView(ListView):
-    model = DataSet

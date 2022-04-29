@@ -68,7 +68,7 @@
                 <p><b>Your datasets:</b></p>
                     <ul>
                     {% for d in datasets %}
-                        <li><a href="">{{ d.pk }}:{{ d.name }}</a></li> 
+                        <li><a href="dataset/{{ d.pk }}/">{{ d.name }}</a></li> 
                     {% endfor %}
                     </ul>
                 {% endif %}

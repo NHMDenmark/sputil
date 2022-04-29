@@ -1,0 +1,42 @@
+{% extends "spwift/base.html" %}
+
+{% block title %}SpWIFT - Specify Web-based Import Facilitation Tool{% endblock %}
+
+{% block pagename %}DataSet Viewer{% endblock %}
+
+{% block contenttitle %}DataSet: {{dataset.name}}{% endblock %}
+
+{% block content %} 
+
+{% if datasetrows %}
+<table class="table">
+    <tr>
+        <th scope="col"><b>id</b></th>
+        <th scope="col"><b>catalognr</b></th>
+        <th scope="col"><b>barcode</b></th>
+        <th scope="col"><b>type</b></th>
+        <th scope="col"><b>determination</b></th>
+        <th scope="col"><b>broadgeography</b></th>
+        <th scope="col"><b>storage</b></th>
+        <th scope="col"><b>preptype</b></th>
+    </tr>
+    {%for row in datasetrows%}
+    <tr>
+        <th scope="row">1{{row.pk}}</th>
+        <td>{{row.catalognr}}</td>  
+        <td>{{row.barcode}}</td> 
+        <td>{{row.type}}</td> 
+        <td>{{row.determination}}</td>   
+        <td>{{row.broadgeography}}</td> 
+        <td>{{row.storage}}</td> 
+        <td>{{row.preptype}}</td> 
+    </tr>
+    {%endfor%}
+</table>
+{%endif%}
+<h4 style="color:red">{{error}}</h4>
+<p>&nbsp;</p>
+<br>
+{%endblock%}
+
+<!--{% block sessioninfo %}{%endblock%}-->
