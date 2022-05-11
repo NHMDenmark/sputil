@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect #, JsonResponse
 from django.urls import reverse 
 # import requests, ssl, sys
 
-from .models import DataSetRow, PreparationType, Session, SpecifyUser, SpCollection, DataSet 
+from .models import DataSetRow, Discipline, HigherTaxon, PreparationType, SpecifyUser, Collection, DataSet # , Session 
 from django.views.generic import ListView 
 
 def index(request):
@@ -27,7 +27,7 @@ def index(request):
             username = user.name
             request.session['username'] = username
             datasets = DataSet.objects.filter(spuser=user)
-            collections = SpCollection.objects.all()
+            collections = Collection.objects.all()
 
 #        collections = '[]'
 #        url = 'https://specify-test.science.ku.dk/context/login/'
@@ -60,7 +60,7 @@ def digit(request):
         return logout(request, context)
     #set up sticky variables
     preptypeid = -1
-    highertaxon = -1
+    highertaxonid = -1
     taxon  = 'incertae sedis'
     region = 'unspecified'
     storage= 'unspecified'
@@ -70,11 +70,9 @@ def digit(request):
     if post_origin == "index":        
         #TODO get form data incl dataset or create new if none selected
         collectionid = int(request.POST.get('collection', -1))
-        #request.session['collectionid'] = collectionid
-        collection = SpCollection.objects.get(pk=collectionid)
+        collection = Collection.objects.get(pk=collectionid)
         datasetid = int(request.POST.get('dataset', -1))
-        #request.session['datasetid'] = datasetid
-        #preptypeid = -1
+        
         if datasetid <= 0: 
             dataset = DataSet(name=user.name + '_' + 
                                     collection.collectioncode + '_' + 
@@ -108,6 +106,9 @@ def digit(request):
             taxon = request.POST.get('taxon', 'incertae sedis')
             region = request.POST.get('region', 'unspecified')
             storage = request.POST.get('storage', 'unspecified')
+            preptypeid = request.POST.get('preptype', 'unspecified')
+            highertaxonid = int(request.POST.get('highertaxon', -1))
+            print('highertaxon: %s' % highertaxonid)
 
             #TODO handle edits to existing datasetrow
         
@@ -117,16 +118,21 @@ def digit(request):
         return index(request, context)
     
     if collectionid > 0 and datasetid > 0:
-        preptypes = PreparationType.objects.all()
-        collections = SpCollection.objects.all()
+        print('highertaxon: %s' % highertaxonid)
         
+        collections = Collection.objects.all()
         user = SpecifyUser.objects.get(pk=userid)
         request.session['userid'] = userid
-        collection = SpCollection.objects.get(pk=collectionid)
+        
+        collection = Collection.objects.get(pk=collectionid)
         request.session['collectionid'] = collectionid
+        
+        preptypes = PreparationType.objects.filter(collection=collection)        
+        highertaxa = HigherTaxon.objects.filter(discipline=collection.discipline_id)
+
         dataset = DataSet.objects.get(pk=datasetid)
         request.session['datasetid'] = datasetid
-
+        
         context = {
             'userid' : userid, 
             'user' : user,
@@ -140,7 +146,8 @@ def digit(request):
             'region' : region,
             'taxon' : taxon, 
             'storage' : storage, 
-            'highertaxon' : highertaxon 
+            'highertaxon' : highertaxonid, 
+            'highertaxa' : highertaxa
             }
 
         return render(request, 'spwift/digit.html', context)

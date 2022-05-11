@@ -9,7 +9,29 @@
 {% block content %} 
                 <form action="{% url 'spwift:digit' %}" method="post">{% csrf_token %}
                     <input type="hidden" id="post_origin" name="post_origin" value="digit"/>
-                    <div class="row">
+                    <div class="row mt-3">
+                        <div class="coll">            
+                            <label for="preptype">Preptype:</label>&nbsp; 
+                                <select id="preptype" name="preptype">
+                                    <option value="-1">(unspecified)</option>
+                                {% if preptypes %}
+                                    {% for pt in preptypes %}
+                                    <option value="{{pt.spid}}" {%if pt.spid|stringformat:"i" == preptypeid %} selected {%endif%}>{{pt.name}}</option>
+                                    {% endfor %}
+                                {% endif %}
+                                </select>
+                            <label for="highertaxon">Higher Taxon</label>
+                                <select id="highertaxon" name="highertaxon">
+                                <option>(unspecified)</option>
+                                {% if highertaxa %}
+                                    {% for ht in highertaxa %}
+                                    <option value="{{ht.pk}}" {%if ht.pk|stringformat:"i" == highertaxon %} selected {%endif%}>{{ht.name}}</option>
+                                    {% endfor %}
+                                {% endif %}
+                                </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
                         <div class="coll">
                             <label for="barcode">Barcode</label>
                             <input type="text" id="barcode" name="barcode" size="14">
@@ -36,7 +58,7 @@
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="storage">Storage</label><br>
-                            <input type="text" id="storage" name="storage" size="49" value="{%if storage%}{{storage}}{%endif%}">
+                            <input type="text" id="storage" name="storage" size="49" value="{%if storage%}{{storage}}{%endif%}">&nbsp;
                         </div>
                     </div>
                     <div class="row mt-3 mb-3">
@@ -58,19 +80,8 @@
                     <b>Collection:</b> {{collection.name}}<br>
                     <b>DataSet:</b> {{dataset_name}}
                 </p>
-                <!--<p>Collection:
-                    <br>                 
-                    <select id="collection" name="collection">
-                    {% if collections %}
-                        <option value="0">(selected collection)</option>                        
-                        {% for c in collections %}
-                        <option value="{{ c.spid }}" {% if c.spid|stringformat:"i" == collectionid.0 %} selected="selected" {%endif%}   >{{c.name|slice:"0:38"}}</option>
-                        {% endfor %}
-                    {% endif %}
-                        <option value="99">Select me!</option>
-                    </select>
-                </p>-->
-                <p>Preptype: 
+                <!-- 
+                    <p>Preptype: 
                     <br>
                     <select id="preptype" name="preptype">
                         <option>(current preptype)</option>
@@ -87,7 +98,7 @@
                     <option>(current taxon)</option>
                     </select>
                 </p>
-                <!-- 
+                
                     <h4>Debugging:</h4>                   
                     <p>{{collections.0}}
                     <p>currcoll: {{collectionid}}</p>

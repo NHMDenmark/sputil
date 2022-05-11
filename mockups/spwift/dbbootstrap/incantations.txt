@@ -1,0 +1,5 @@
+python manage.py makemigrations spwift
+
+python manage.py sqlmigrate spwift 0001
+
+python manage.py migrate
