@@ -12,4 +12,5 @@ urlpatterns = [
 #   path('dataset', views.dataset, name='dataset')
 #    path('datasets/', DataSetListView.as_view()),
     path('dataset/<int:dataset_id>/', views.dataset, name='dataset'),
+    path('taxa', views.TaxonListView.as_view(), name='main-view'),
 ]

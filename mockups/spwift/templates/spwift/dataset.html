@@ -4,7 +4,7 @@
 
 {% block pagename %}DataSet Viewer{% endblock %}
 
-{% block contenttitle %}DataSet: {{dataset.name}}{% endblock %}
+{% block contenttitle %}DataSet: {{dataset.name}} {% endblock %}
 
 {% block content %} 
 
@@ -14,22 +14,35 @@
         <th scope="col"><b>id</b></th>
         <th scope="col"><b>catalognr</b></th>
         <th scope="col"><b>barcode</b></th>
-        <th scope="col"><b>type</b></th>
+        <!--<th scope="col"><b>type</b></th>-->
         <th scope="col"><b>determination</b></th>
         <th scope="col"><b>broadgeography</b></th>
         <th scope="col"><b>storage</b></th>
-        <th scope="col"><b>preptype</b></th>
+        <th scope="col"><b>pt</b></th>
+        <th scope="col"><b>ht</b></th>
+        <th scope="col"><b></b></th>
     </tr>
     {%for row in datasetrows%}
     <tr>
-        <th scope="row">1{{row.pk}}</th>
+        <th scope="row">{{row.pk}}</th>
         <td>{{row.catalognr}}</td>  
         <td>{{row.barcode}}</td> 
-        <td>{{row.type}}</td> 
+        <!--<td>{{row.type}}</td>-->
         <td>{{row.determination}}</td>   
         <td>{{row.broadgeography}}</td> 
         <td>{{row.storage}}</td> 
-        <td>{{row.preptype}}</td> 
+        <td>{{row.preptypeid}}</td> 
+        <td>{{row.highertaxonid}}</td> 
+        <td>
+            <form action="{% url 'spwift:digit' %}" method="post">{% csrf_token %}
+                <input type="hidden" id="post_origin" name="post_origin" value="dataset"/>
+                <input type="hidden" id="datasetid" name="datasetid" value="{{row.dataset_id}}"/>
+                <input type="hidden" id="datasetrowid" name="datasetrowid" value="{{row.pk}}"/>
+                <input type="hidden" id="collectionid" name="collection" value="{{row.dataset.collection_id}}"/>
+                <input type="hidden" id="datasetid" name="dataset" value="{{row.dataset.collection_id}}"/>
+                <input type="submit" value="Edit"/>
+            </form>
+        </td>
     </tr>
     {%endfor%}
 </table>

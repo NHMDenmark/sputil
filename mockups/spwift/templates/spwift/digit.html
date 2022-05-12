@@ -9,6 +9,7 @@
 {% block content %} 
                 <form action="{% url 'spwift:digit' %}" method="post">{% csrf_token %}
                     <input type="hidden" id="post_origin" name="post_origin" value="digit"/>
+                    <input type="hidden" id="datasetrowid" name="datasetrowid" value="{%if datasetrowid%}{{datasetrowid}}{%else%}-1{%endif%}"/>
                     <div class="row mt-3">
                         <div class="coll">            
                             <label for="preptype">Preptype:</label>&nbsp; 
@@ -21,11 +22,11 @@
                                 {% endif %}
                                 </select>
                             <label for="highertaxon">Higher Taxon</label>
-                                <select id="highertaxon" name="highertaxon">
-                                <option>(unspecified)</option>
+                                <select id="highertaxon" name="highertaxonid">
+                                <option value="-1">(unspecified)</option>
                                 {% if highertaxa %}
                                     {% for ht in highertaxa %}
-                                    <option value="{{ht.pk}}" {%if ht.pk|stringformat:"i" == highertaxon %} selected {%endif%}>{{ht.name}}</option>
+                                    <option value="{{ht.pk}}" {%if ht.pk == highertaxonid %} selected {%endif%}>{{ht.name}}</option>
                                     {% endfor %}
                                 {% endif %}
                                 </select>
@@ -34,9 +35,9 @@
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="barcode">Barcode</label>
-                            <input type="text" id="barcode" name="barcode" size="14">
+                            <input type="text" id="barcode" name="barcode" size="14" value="{%if datasetrow%}{{datasetrow.barcode}}{%endif%}">
                             <label for="catnr">Alt Cat Nr</label>
-                            <input type="text" id="catnr" name="catnr" size="14">
+                            <input type="text" id="catnr" name="catnr" size="14" value="{%if datasetrow%}{{datasetrow.catalognr}}{%endif%}">
                             <input type="checkbox" id="barcode_catnr" name="barcode_catnr">
                             <label for="barcode_catnr">Barcode=CatNr</label>
                         </div>
@@ -44,13 +45,13 @@
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="region">Broad Geographical Region</label><br>
-                            <input type="text" id="region" name="region" size="49" value="{%if region%}{{region}}{%endif%}">
+                            <input type="text" id="region" name="region" size="49" value="{%if datasetrow%}{{datasetrow.broadgeography}}{%endif%}">
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="taxon">Determination</label><br>
-                            <input type="text" id="taxon" name="taxon" size="49" value="{%if taxon%}{{taxon}}{%endif%}">
+                            <input type="text" id="taxon" name="taxon" size="49" value="{%if datasetrow%}{{datasetrow.determination}}{%endif%}" placeholder="type here to search taxon..."><!-- onkeyup="filterTaxa()">-->
                             <input type="checkbox" id="type" name="type">
                             <label for="type">Type</label>
                         </div>
@@ -58,27 +59,30 @@
                     <div class="row mt-3">
                         <div class="coll">
                             <label for="storage">Storage</label><br>
-                            <input type="text" id="storage" name="storage" size="49" value="{%if storage%}{{storage}}{%endif%}">&nbsp;
+                            <input type="text" id="storage" name="storage" size="49" value="{%if datasetrow%}{{datasetrow.storage}}{%endif%}">&nbsp;
                         </div>
                     </div>
                     <div class="row mt-3 mb-3">
                         <div class="coll">
-                            <div class="container-fluid">
-                                <input type="submit" value="Save & Go Back">
-                                <input type="submit" value="Save">
-                                <input type="submit" value="Save & Next">
+                            <div class="container-fluid">                                
+                                <!--<button type="submit" id="savegoback" value="" name="savegoback" accesskey="a">Save & Go Back</button>-->
+                                <button type="submit" id="save" value="Save" name="save" accesskey="s">Save</button>
+                                <button type="submit" id="savenext" value="savenext" name="save" accesskey="d">Save & New</button>
                             </div>
                         </div>
                     </div>
                 </form>
+                <div id="taxonlist" style="border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 10px solid white">
+                </div>
 {% endblock %}
 
 {% block sessioninfo %}
                 <p>
-                    <b>Username:</b> {{username}}<br>
-                    <b>DateTime:</b> {% now "jS F Y H:i" %}<br>
-                    <b>Collection:</b> {{collection.name}}<br>
-                    <b>DataSet:</b> {{dataset_name}}
+                    <b>Username: </b> {{username}}<br>
+                    <b>DateTime: </b> {% now "jS F Y H:i" %}<br>
+                    <b>Collection: </b> {{collection.name}}<br>
+                    <b>DataSet: </b><a href="dataset/{{ datasetid }}/">{{dataset_name}}</a><br>
+                    <b>Current row id: </b> {%if datasetrow.pk > 0%}{{datasetrow.pk}}{%else%}(new){%endif%}
                 </p>
                 <!-- 
                     <p>Preptype: 
@@ -104,4 +108,76 @@
                     <p>currcoll: {{collectionid}}</p>
                     <p>datasetid: {{datasetid}}</p>
                     -->
+{% endblock %}
+
+{%block scripts%}
+<script>
+    let filteredTaxa = [] 
+    const data = '{{qs_json}}'
+    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+
+    const input = document.getElementById('taxon')
+    console.log(input)
+
+    input.addEventListener('keyup', (e)=>{
+        console.log('filtering taxon list...')
+        taxonlist.innerHTML = ""
+        filteredTaxa = rdata.filter(info=> info['name'].includes(e.target.value))
+        if(filteredTaxa.length > 0){
+            filteredTaxa.map(info=>{
+                taxonlist.innerHTML += `<span id='${info['id']}' onclick="selectTaxon('${info['name']}')">${info['name']}</span><br>`
+            })
+        } else {
+            taxonlist.innerHTML = "<span>(nothing found...)</span>"
+        }
+
+        var rect = e.target.getBoundingClientRect();
+        console.log(rect.top, rect.right, rect.bottom, rect.left);
+
+        taxonlist.style.top = (rect.top + 30) +  "px"
+        taxonlist.style.left = (rect.left + 5) +  "px"
+
+    }) 
+
+    //TODO: 
+    /*
+    let filteredRegions = [] 
+    const data = '{{regions_json}}'
+    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+
+    const input = document.getElementById('taxon')
+    console.log(input)
+
+    input.addEventListener('keyup', (e)=>{
+        console.log('filtering region list...')
+        taxonlist.innerHTML = ""
+        filteredRegions = rdata.filter(info=> info['name'].includes(e.target.value))
+        if(filteredRegions.length > 0){
+            filteredRegions.map(info=>{
+                taxonlist.innerHTML += `<span id='${info['id']}' onclick="selectTaxon('${info['name']}')">${info['name']}</span><br>`
+            })
+        } else {
+            taxonlist.innerHTML = "<span>(nothing found...)</span>"
+        }
+
+        var rect = e.target.getBoundingClientRect();
+        console.log(rect.top, rect.right, rect.bottom, rect.left);
+
+        taxonlist.style.top = (rect.top + 30) +  "px"
+        taxonlist.style.left = (rect.left + 5) +  "px"
+
+    }) 
+    */
+    
+    function selectTaxon(taxon)
+    {
+        console.log(taxon)
+        const input = document.getElementById('taxon')
+        console.log(input)
+        input.value = taxon
+        taxonlist.innerHTML = ""
+    }
+
+</script>
+
 {% endblock %}

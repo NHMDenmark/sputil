@@ -85,7 +85,11 @@ class DataSetRow(models.Model):
     determination = models.CharField(max_length=256, null=True, blank=True)
     broadgeography = models.CharField(max_length=65536, null=True, blank=True)
     storage = models.CharField(max_length=65536, null=True, blank=True)
-    preptype = models.CharField(max_length=256, null=True, blank=True) #models.ForeignKey(PreparationType, on_delete=models.DO_NOTHING, null=True)
+    #models.ForeignKey(PreparationType, on_delete=models.DO_NOTHING, null=True)
+    preptypeid = models.IntegerField(null=True, blank=True)
+    preptype = models.CharField(max_length=256, null=True, blank=True) 
+    #models.ForeignKey(HigherTaxon, on_delete=models.DO_NOTHING, null=True)
+    highertaxonid = models.IntegerField(null=True, blank=True)
     highertaxon = models.CharField(max_length=256, null=True, blank=True) 
 
     def updatename(self):
@@ -104,10 +108,16 @@ class DataSetRow(models.Model):
     def __str__ (self):     
         return self.name 
     
+class Taxon(models.Model):
+    spid = models.IntegerField(null=True, blank=True)
+    name = models.CharField(max_length=128)
+    # discipline = models.ForeignKey(Discipline, on_delete=models.DO_NOTHING)
     
+    def __str__(self):
+        return self.name #str(self.pk)  + ":" +  self.name + "[" + str(self.spid) + "]"
 
 
-    
+
 
 
 

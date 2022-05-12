@@ -1,0 +1,59 @@
+
+
+{% block title %}{% endblock %}
+
+{% block pagename %}{% endblock %}
+
+{% block contenttitle %}{% endblock %}
+
+{% block content %} 
+    <p>&nbsp;</p>
+    <input type="text" id="search_here" value="" class="form-control mb-3" placeholder="type here to search..."/>
+    <div id="box">
+        <!--{% for item in object_list %}
+            <span onclick="selectTaxon('{{item.name}}')" id="{{item.pk}}">{{item.name}}</span><br>
+        {% endfor %}-->
+    </div>
+{% endblock %}
+
+{%block scripts%}
+<script>
+    const data = '{{qs_json}}'
+    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+    console.log(rdata)
+
+    const input = document.getElementById('search_here')
+
+    let filteredArr = [] 
+
+    input.addEventListener('keyup', (e)=>{
+        console.log('added event listener')
+        box.innerHTML = ""
+        filteredArr = rdata.filter(info=> info['name'].includes(e.target.value))
+        if(filteredArr.length > 0){
+            filteredArr.map(info=>{
+                box.innerHTML += `<span id='${info['id']}' onclick="selectTaxon('${info['name']}')">${info['name']}</span><br>`
+            })
+        } else {
+            box.innerHTML = "<span>(nothing found...)</span>"
+        }
+    }) 
+
+    function selectTaxon(taxon)
+    {
+        console.log(taxon)
+        const input = document.getElementById('search_here')
+        console.log(input)
+        input.value = taxon
+        box.innerHTML = ""
+    }
+
+</script>
+
+{% endblock %}
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+
