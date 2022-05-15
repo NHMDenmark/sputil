@@ -9,7 +9,7 @@ from django.urls import reverse
 # import requests, ssl, sys
 import json 
 
-from .models import DataSetRow, Discipline, HigherTaxon, PreparationType, SpecifyUser, Collection, DataSet, Taxon # , Session 
+from .models import BroadGeographicRegion, DataSetRow, Discipline, HigherTaxon, PreparationType, SpecifyUser, Collection, DataSet, Taxon # , Session 
 from django.views.generic import ListView 
 
 def index(request):
@@ -98,6 +98,8 @@ def digit(request):
             if datasetrowid > 0: 
                 print('fetch row data')
                 datasetrow = DataSetRow.objects.get(pk=datasetrowid)
+                highertaxonid = datasetrow.highertaxonid
+                preptypeid = datasetrow.preptypeid
                 if highertaxonid > 0:
                     highertaxon = HigherTaxon.objects.get(pk=highertaxonid)
                 # region = datasetrow.broadgeography
@@ -122,7 +124,8 @@ def digit(request):
             taxon = request.POST.get('taxon', 'incertae sedis')
             region = request.POST.get('region', 'unspecified')
             storage = request.POST.get('storage', 'unspecified')
-            preptypeid = request.POST.get('preptype', 'unspecified')
+            if request.POST.get('preptypeid') != '':
+                preptypeid = int(request.POST.get('preptypeid', -1))
             highertaxonid = int(request.POST.get('highertaxonid', -1))
             saveaction = request.POST.get('save', 'unspecified')
 
@@ -135,6 +138,7 @@ def digit(request):
                                 determination=taxon,
                                 broadgeography=region,
                                 storage=storage,
+                                preptypeid=preptypeid,
                                 highertaxonid=highertaxonid)
             else:
                 datasetrow = DataSetRow.objects.get(pk=datasetrowid)
@@ -179,7 +183,10 @@ def digit(request):
         request.session['datasetid'] = datasetid
         
         taxa = Taxon.objects.values()
-        qs_json = json.dumps(list(taxa))
+        taxa_json = json.dumps(list(taxa))
+
+        regions = BroadGeographicRegion.objects.values()
+        regions_json = json.dumps(list(regions))
 
         context = {
             'userid' : userid, 
@@ -198,7 +205,8 @@ def digit(request):
             'storage' : storage, 
             'highertaxonid' : highertaxonid, 
             'highertaxa' : highertaxa, 
-            'qs_json' : qs_json
+            'taxa_json' : taxa_json, 
+            'regions_json' : regions_json,
             }
 
         return render(request, 'spwift/digit.html', context)
@@ -287,5 +295,5 @@ class TaxonListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         taxa = Taxon.objects.values()
-        context["qs_json"] = json.dumps(list(taxa))
+        context["taxa_json"] = json.dumps(list(taxa))
         return context

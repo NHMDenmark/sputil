@@ -13,17 +13,17 @@
                     <div class="row mt-3">
                         <div class="coll">            
                             <label for="preptype">Preptype:</label>&nbsp; 
-                                <select id="preptype" name="preptype">
-                                    <option value="-1">(unspecified)</option>
+                                <select id="preptype" name="preptypeid">
+                                    <option value="">(unspecified)</option>
                                 {% if preptypes %}
                                     {% for pt in preptypes %}
-                                    <option value="{{pt.spid}}" {%if pt.spid|stringformat:"i" == preptypeid %} selected {%endif%}>{{pt.name}}</option>
+                                    <option value="{{pt.pk}}" {%if pt.pk|stringformat:"i" == preptypeid %} selected {%endif%}>{{pt.name}}</option>
                                     {% endfor %}
                                 {% endif %}
                                 </select>
                             <label for="highertaxon">Higher Taxon</label>
                                 <select id="highertaxon" name="highertaxonid">
-                                <option value="-1">(unspecified)</option>
+                                <option value="">(unspecified)</option>
                                 {% if highertaxa %}
                                     {% for ht in highertaxa %}
                                     <option value="{{ht.pk}}" {%if ht.pk == highertaxonid %} selected {%endif%}>{{ht.name}}</option>
@@ -72,7 +72,9 @@
                         </div>
                     </div>
                 </form>
-                <div id="taxonlist" style="border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 10px solid white">
+                <div id="taxonlist" style="border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 0px solid white">
+                </div>                
+                <div id="regionlist" style="border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 0px solid white">
                 </div>
 {% endblock %}
 
@@ -84,48 +86,24 @@
                     <b>DataSet: </b><a href="dataset/{{ datasetid }}/">{{dataset_name}}</a><br>
                     <b>Current row id: </b> {%if datasetrow.pk > 0%}{{datasetrow.pk}}{%else%}(new){%endif%}
                 </p>
-                <!-- 
-                    <p>Preptype: 
-                    <br>
-                    <select id="preptype" name="preptype">
-                        <option>(current preptype)</option>
-                    {% if preptypes %}
-                        {% for pt in preptypes %}
-                        <option value="{{pt.spid}}" {%if pt.spid|stringformat:"i" == preptypeid.0 %} select {%endif%}>{{pt.name}}</option>
-                        {% endfor %}
-                    {% endif %}
-                    </select>
-                </p>
-                <p>Higher Taxon: 
-                    <br>
-                    <select id="taxon" name="taxon">
-                    <option>(current taxon)</option>
-                    </select>
-                </p>
-                
-                    <h4>Debugging:</h4>                   
-                    <p>{{collections.0}}
-                    <p>currcoll: {{collectionid}}</p>
-                    <p>datasetid: {{datasetid}}</p>
-                    -->
 {% endblock %}
 
 {%block scripts%}
 <script>
     let filteredTaxa = [] 
-    const data = '{{qs_json}}'
-    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+    const taxa = '{{taxa_json}}'
+    const rtaxa = JSON.parse(taxa.replace(/&quot;/g, '"'))
 
-    const input = document.getElementById('taxon')
-    console.log(input)
+    const taxon = document.getElementById('taxon')
+    console.log(taxon)
 
-    input.addEventListener('keyup', (e)=>{
+    taxon.addEventListener('keyup', (e)=>{
         console.log('filtering taxon list...')
         taxonlist.innerHTML = ""
-        filteredTaxa = rdata.filter(info=> info['name'].includes(e.target.value))
+        filteredTaxa = rtaxa.filter(info=> info['name'].toLowerCase().includes(e.target.value.toLowerCase()))
         if(filteredTaxa.length > 0){
             filteredTaxa.map(info=>{
-                taxonlist.innerHTML += `<span id='${info['id']}' onclick="selectTaxon('${info['name']}')">${info['name']}</span><br>`
+                taxonlist.innerHTML += `<span id='${info['id']}' onclick="selectTaxon('${info['name']}')" class="hoverme">${info['name']}</span><br>`
             })
         } else {
             taxonlist.innerHTML = "<span>(nothing found...)</span>"
@@ -138,44 +116,46 @@
         taxonlist.style.left = (rect.left + 5) +  "px"
 
     }) 
-
-    //TODO: 
-    /*
-    let filteredRegions = [] 
-    const data = '{{regions_json}}'
-    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
-
-    const input = document.getElementById('taxon')
-    console.log(input)
-
-    input.addEventListener('keyup', (e)=>{
-        console.log('filtering region list...')
+    
+    function selectTaxon(name)
+    {
+        const taxon = document.getElementById('taxon')
+        taxon.value = name
         taxonlist.innerHTML = ""
-        filteredRegions = rdata.filter(info=> info['name'].includes(e.target.value))
+    }
+
+    let filteredRegions = [] 
+    const regions = '{{regions_json}}'
+    const rregions = JSON.parse(regions.replace(/&quot;/g, '"'))
+
+    const region = document.getElementById('region')
+    console.log(region)
+
+    region.addEventListener('keyup', (e)=>{
+        console.log('filtering region list...')
+        regionlist.innerHTML = ""
+        filteredRegions = rregions.filter(info=> info['name'].includes(e.target.value))
         if(filteredRegions.length > 0){
             filteredRegions.map(info=>{
-                taxonlist.innerHTML += `<span id='${info['id']}' onclick="selectTaxon('${info['name']}')">${info['name']}</span><br>`
+                regionlist.innerHTML += `<span id='${info['id']}' onclick="selectRegion('${info['name']}')" class="hoverme">${info['name']}</span><br>`
             })
         } else {
-            taxonlist.innerHTML = "<span>(nothing found...)</span>"
+            regionlist.innerHTML = "<span>(nothing found...)</span>"
         }
 
         var rect = e.target.getBoundingClientRect();
         console.log(rect.top, rect.right, rect.bottom, rect.left);
 
-        taxonlist.style.top = (rect.top + 30) +  "px"
-        taxonlist.style.left = (rect.left + 5) +  "px"
+        regionlist.style.top = (rect.top + 30) +  "px"
+        regionlist.style.left = (rect.left + 5) +  "px"
 
     }) 
-    */
     
-    function selectTaxon(taxon)
+    function selectRegion(name)
     {
-        console.log(taxon)
-        const input = document.getElementById('taxon')
-        console.log(input)
-        input.value = taxon
-        taxonlist.innerHTML = ""
+        const region = document.getElementById('region')
+        region.value = name
+        regionlist.innerHTML = ""
     }
 
 </script>
