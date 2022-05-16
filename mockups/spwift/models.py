@@ -85,12 +85,12 @@ class DataSetRow(models.Model):
     determination = models.CharField(max_length=256, null=True, blank=True)
     broadgeography = models.CharField(max_length=65536, null=True, blank=True)
     storage = models.CharField(max_length=65536, null=True, blank=True)
-    #models.ForeignKey(PreparationType, on_delete=models.DO_NOTHING, null=True)
     preptypeid = models.IntegerField(null=True, blank=True)
-    preptype = models.CharField(max_length=256, null=True, blank=True) 
-    #models.ForeignKey(HigherTaxon, on_delete=models.DO_NOTHING, null=True)
+    preptypename = models.CharField(max_length=256, null=True, blank=True) 
+    preptype =  models.ForeignKey(PreparationType, on_delete=models.DO_NOTHING, null=True)
     highertaxonid = models.IntegerField(null=True, blank=True)
-    highertaxon = models.CharField(max_length=256, null=True, blank=True) 
+    highertaxonname = models.CharField(max_length=256, null=True, blank=True) 
+    highertaxon = models.ForeignKey(HigherTaxon, on_delete=models.DO_NOTHING, null=True)
 
     def updatename(self):
         self.name = 'DataSetRow (' + self.dataset.name + ') '

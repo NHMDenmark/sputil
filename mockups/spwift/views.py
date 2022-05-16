@@ -126,7 +126,11 @@ def digit(request):
             storage = request.POST.get('storage', 'unspecified')
             if request.POST.get('preptypeid') != '':
                 preptypeid = int(request.POST.get('preptypeid', -1))
+            if preptypeid > 0:
+                preptype = PreparationType.objects.get(pk=preptypeid)
             highertaxonid = int(request.POST.get('highertaxonid', -1))
+            if highertaxonid > 0: 
+                highertaxon = HigherTaxon.objects.get(pk=highertaxonid)
             saveaction = request.POST.get('save', 'unspecified')
 
             if datasetrowid < 1:
@@ -139,7 +143,9 @@ def digit(request):
                                 broadgeography=region,
                                 storage=storage,
                                 preptypeid=preptypeid,
-                                highertaxonid=highertaxonid)
+                                preptype=preptype,
+                                highertaxonid=highertaxonid,
+                                highertaxon = highertaxon)
             else:
                 datasetrow = DataSetRow.objects.get(pk=datasetrowid)
                 datasetrow.catalognr = catalognr
@@ -149,6 +155,9 @@ def digit(request):
                 datasetrow.broadgeography=region
                 datasetrow.storage=storage
                 datasetrow.highertaxonid=highertaxonid
+                datasetrow.highertaxon = highertaxon
+                datasetrow.preptypeid = preptypeid
+                datasetrow.preptype = preptype
             
             datasetrow.updatename()
             datasetrow.save()
