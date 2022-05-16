@@ -112,7 +112,7 @@ def digit(request):
         #TODO get session and save form data
         datasetid = request.session.get('datasetid', -1)
         collectionid = request.session.get('collectionid', -1)
-
+        collection = Collection.objects.get(pk=collectionid)
         datasetrowid = int(request.POST.get('datasetrowid',-1))
 
         if datasetid > 0: 
@@ -128,9 +128,12 @@ def digit(request):
                 preptypeid = int(request.POST.get('preptypeid', -1))
             if preptypeid > 0:
                 preptype = PreparationType.objects.get(pk=preptypeid)
-            highertaxonid = int(request.POST.get('highertaxonid', -1))
+            else: preptype = Empty                
+            if request.POST.get('highertaxonid') != '':
+                highertaxonid = int(request.POST.get('highertaxonid', -1))
             if highertaxonid > 0: 
                 highertaxon = HigherTaxon.objects.get(pk=highertaxonid)
+            else: highertaxon = Empty 
             saveaction = request.POST.get('save', 'unspecified')
 
             if datasetrowid < 1:
@@ -143,9 +146,11 @@ def digit(request):
                                 broadgeography=region,
                                 storage=storage,
                                 preptypeid=preptypeid,
-                                preptype=preptype,
-                                highertaxonid=highertaxonid,
-                                highertaxon = highertaxon)
+                                highertaxonid=highertaxonid)
+                if highertaxon != Empty:
+                    datasetrow.highertaxon = highertaxon
+                if preptype != Empty:
+                    datasetrow.preptype = preptype
             else:
                 datasetrow = DataSetRow.objects.get(pk=datasetrowid)
                 datasetrow.catalognr = catalognr
@@ -155,9 +160,11 @@ def digit(request):
                 datasetrow.broadgeography=region
                 datasetrow.storage=storage
                 datasetrow.highertaxonid=highertaxonid
-                datasetrow.highertaxon = highertaxon
+                if highertaxon != Empty:
+                    datasetrow.highertaxon = highertaxon
                 datasetrow.preptypeid = preptypeid
-                datasetrow.preptype = preptype
+                if preptype != Empty:
+                    datasetrow.preptype = preptype
             
             datasetrow.updatename()
             datasetrow.save()
@@ -185,7 +192,10 @@ def digit(request):
         collection = Collection.objects.get(pk=collectionid)
         request.session['collectionid'] = collectionid
         
-        preptypes = PreparationType.objects.filter(collection=collection)        
+        preptypes = PreparationType.objects.filter(collection=collection)       
+        pt_json = json.dumps(list(preptypes.values()))
+        print(pt_json)
+        print(preptypeid)
         highertaxa = HigherTaxon.objects.filter(discipline=collection.discipline_id)
 
         dataset = DataSet.objects.get(pk=datasetid)

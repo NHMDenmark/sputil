@@ -17,7 +17,7 @@
                                     <option value="">(unspecified)</option>
                                 {% if preptypes %}
                                     {% for pt in preptypes %}
-                                    <option value="{{pt.pk}}" {%if pt.pk|stringformat:"i" == preptypeid %} selected {%endif%}>{{pt.name}}</option>
+                                    <option value="{{pt.pk}}" {%if pt.pk == preptypeid %} selected {%endif%}>{{pt.name}}</option>
                                     {% endfor %}
                                 {% endif %}
                                 </select>
@@ -72,9 +72,9 @@
                         </div>
                     </div>
                 </form>
-                <div id="taxonlist" style="border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 0px solid white">
+                <div id="taxonlist" style="width: 400px; border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 0px solid white">
                 </div>                
-                <div id="regionlist" style="border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 0px solid white">
+                <div id="regionlist" style="width: 400px; border: 0px solid grey;background-color: white;position: fixed; top: 512px; left: 100px; border: 0px solid white">
                 </div>
 {% endblock %}
 
@@ -134,7 +134,7 @@
     region.addEventListener('keyup', (e)=>{
         console.log('filtering region list...')
         regionlist.innerHTML = ""
-        filteredRegions = rregions.filter(info=> info['name'].includes(e.target.value))
+        filteredRegions = rregions.filter(info=> info['name'].toLowerCase().includes(e.target.value.toLowerCase()))
         if(filteredRegions.length > 0){
             filteredRegions.map(info=>{
                 regionlist.innerHTML += `<span id='${info['id']}' onclick="selectRegion('${info['name']}')" class="hoverme">${info['name']}</span><br>`
